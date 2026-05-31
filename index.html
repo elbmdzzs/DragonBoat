@@ -29,29 +29,27 @@ const TEAM = 1;
 
 function send(button)
 {
-    fetch(
-        DATABASE + "/latestInput.json",
+    fetch(DATABASE + "/inputs.json",
+    {
+        method: "POST",
+        headers:
         {
-            method: "PUT",
-            headers:
-            {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(
-            {
-                team: TEAM,
-                button: button,
-                timestamp: Date.now()
-            })
-        }
-    )
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(
+        {
+            team: TEAM,
+            button: button,
+            timestamp: Date.now()
+        })
+    })
     .then(() =>
     {
         console.log("sent", button);
     })
-    .catch(error =>
+    .catch(err =>
     {
-        console.error(error);
+        console.error(err);
     });
 }
 
