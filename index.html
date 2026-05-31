@@ -27,11 +27,18 @@ const DATABASE =
 
 const TEAM = 1;
 
-function send(button)
+async function send(button)
 {
-    fetch(DATABASE + "/inputs.json",
+    // 1. 先讀 currentIndex
+    let res = await fetch(DATABASE + "/meta/currentIndex.json");
+    let index = await res.json();
+
+    if (index === null) index = 0;
+
+    // 2. 寫入事件
+    await fetch(DATABASE + "/events/" + index + ".json",
     {
-        method: "POST",
+        method: "PUT",
         headers:
         {
             "Content-Type": "application/json"
@@ -42,17 +49,21 @@ function send(button)
             button: button,
             timestamp: Date.now()
         })
-    })
-    .then(() =>
-    {
-        console.log("sent", button);
-    })
-    .catch(err =>
-    {
-        console.error(err);
     });
-}
 
+    // 3. 更新 index
+    await fetch(DATABASE + "/meta/currentIndex.json",
+    {
+        method: "PUT",
+        headers:
+        {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(index + 1)
+    });
+
+    console.log("sent", button);
+}
 </script>
 
 </body>
