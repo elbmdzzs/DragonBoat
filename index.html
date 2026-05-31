@@ -2,43 +2,152 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Dragon Boat</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dragon Boat Controller</title>
+
+<style>
+
+body {
+    margin: 0;
+    font-family: sans-serif;
+    background: #0b1a2b;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 選船畫面 */
+#setup {
+    margin-top: 80px;
+    text-align: center;
+}
+
+input {
+    font-size: 20px;
+    padding: 10px;
+    width: 80px;
+    text-align: center;
+}
+
+/* 主控制區 */
+#controller {
+    display: none;
+    width: 100%;
+    height: 100vh;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 標題 */
+#title {
+    margin-top: 20px;
+    font-size: 24px;
+}
+
+/* 按鈕區 */
+.container {
+    display: flex;
+    justify-content: space-between;
+    width: 90%;
+    margin-top: 40px;
+}
+
+/* 左右欄 */
+.column {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+/* 按鈕 */
+.btn {
+    width: 80px;
+    height: 80px;
+    background-size: cover;
+    border-radius: 12px;
+    transition: transform 0.1s;
+}
+
+.btn:active {
+    transform: scale(0.9);
+}
+
+</style>
 </head>
+
 <body>
 
-<h1>Team 1</h1>
+<!-- 選擇船 -->
+<div id="setup">
+    <h2>輸入龍舟編號 (1~5)</h2>
+    <input id="teamInput" type="number" min="1" max="5">
+    <button onclick="start()">開始</button>
+</div>
 
-<button onclick="send(1)">1</button>
-<button onclick="send(2)">2</button>
-<button onclick="send(3)">3</button>
-<button onclick="send(4)">4</button>
+<!-- 控制器 -->
+<div id="controller">
 
-<br><br>
+    <div id="title">Team 1</div>
 
-<button onclick="send(5)">5</button>
-<button onclick="send(6)">6</button>
-<button onclick="send(7)">7</button>
-<button onclick="send(8)">8</button>
+    <div class="container">
+
+        <!-- 左邊 1~4 -->
+        <div class="column">
+            <div class="btn" onclick="send(1)" style="background-image:url('btn1.png')"></div>
+            <div class="btn" onclick="send(2)" style="background-image:url('btn2.png')"></div>
+            <div class="btn" onclick="send(3)" style="background-image:url('btn3.png')"></div>
+            <div class="btn" onclick="send(4)" style="background-image:url('btn4.png')"></div>
+        </div>
+
+        <!-- 右邊 5~8 -->
+        <div class="column">
+            <div class="btn" onclick="send(5)" style="background-image:url('btn5.png')"></div>
+            <div class="btn" onclick="send(6)" style="background-image:url('btn6.png')"></div>
+            <div class="btn" onclick="send(7)" style="background-image:url('btn7.png')"></div>
+            <div class="btn" onclick="send(8)" style="background-image:url('btn8.png')"></div>
+        </div>
+
+    </div>
+
+</div>
 
 <script>
 
 const DATABASE =
 "https://river-boat-default-rtdb.asia-southeast1.firebasedatabase.app";
 
-const TEAM = 1;
+let TEAM = 1;
 
-async function send(button)
+function start()
 {
-    // 1. 先讀 currentIndex
-    let res = await fetch(DATABASE + "/meta/currentIndex.json");
-    let index = await res.json();
+    let input = document.getElementById("teamInput").value;
 
-    if (index === null) index = 0;
+    TEAM = parseInt(input);
 
-    // 2. 寫入事件
-    await fetch(DATABASE + "/events/" + index + ".json",
+    document.getElementById("setup").style.display = "none";
+    document.getElementById("controller").style.display = "flex";
+
+    document.getElementById("title").innerText =
+        "Team " + TEAM;
+}
+
+/* 按鈕圖片切換 */
+function setActive(btn)
+{
+    btn.style.filter = "brightness(1.5)";
+    setTimeout(() =>
     {
-        method: "PUT",
+        btn.style.filter = "brightness(1)";
+    }, 150);
+}
+
+/* 送資料 */
+function send(button)
+{
+    fetch(DATABASE + "/events.json",
+    {
+        method: "POST",
         headers:
         {
             "Content-Type": "application/json"
@@ -51,19 +160,13 @@ async function send(button)
         })
     });
 
-    // 3. 更新 index
-    await fetch(DATABASE + "/meta/currentIndex.json",
-    {
-        method: "PUT",
-        headers:
-        {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(index + 1)
-    });
+    // 視覺回饋
+    let btn =
+        event.target;
 
-    console.log("sent", button);
+    setActive(btn);
 }
+
 </script>
 
 </body>
