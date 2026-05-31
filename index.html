@@ -92,21 +92,19 @@ input {
 
     <div class="container">
 
-        <!-- 左邊 1~4 -->
         <div class="column">
-            <div class="btn" onclick="send(1)" style="background-image:url('btn1.png')"></div>
-            <div class="btn" onclick="send(2)" style="background-image:url('btn2.png')"></div>
-            <div class="btn" onclick="send(3)" style="background-image:url('btn3.png')"></div>
-            <div class="btn" onclick="send(4)" style="background-image:url('btn4.png')"></div>
-        </div>
+	    <div class="btn" onpointerdown="send(event, 1)" style="background-image:url('btn1.png')"></div>
+	    <div class="btn" onpointerdown="send(event, 2)" style="background-image:url('btn2.png')"></div>
+	    <div class="btn" onpointerdown="send(event, 3)" style="background-image:url('btn3.png')"></div>
+	    <div class="btn" onpointerdown="send(event, 4)" style="background-image:url('btn4.png')"></div>
+	</div>
 
-        <!-- 右邊 5~8 -->
-        <div class="column">
-            <div class="btn" onclick="send(5)" style="background-image:url('btn5.png')"></div>
-            <div class="btn" onclick="send(6)" style="background-image:url('btn6.png')"></div>
-            <div class="btn" onclick="send(7)" style="background-image:url('btn7.png')"></div>
-            <div class="btn" onclick="send(8)" style="background-image:url('btn8.png')"></div>
-        </div>
+	<div class="column">
+	    <div class="btn" onpointerdown="send(event, 5)" style="background-image:url('btn5.png')"></div>
+	    <div class="btn" onpointerdown="send(event, 6)" style="background-image:url('btn6.png')"></div>
+	    <div class="btn" onpointerdown="send(event, 7)" style="background-image:url('btn7.png')"></div>
+	    <div class="btn" onpointerdown="send(event, 8)" style="background-image:url('btn8.png')"></div>
+	</div>
 
     </div>
 
@@ -142,8 +140,11 @@ function setActive(btn)
     }, 150);
 }
 
-async function send(button)
+async function send(event, button) 
 {
+    // 阻止預設行為，防止手機端點擊出現怪異反白
+    if(event) event.preventDefault(); 
+
     // 1. 先讀 currentIndex
     let res = await fetch(DATABASE + "/meta/currentIndex.json");
     let index = await res.json();
@@ -154,10 +155,7 @@ async function send(button)
     await fetch(DATABASE + "/events/" + index + ".json",
     {
         method: "PUT",
-        headers:
-        {
-            "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(
         {
             team: TEAM,
@@ -170,20 +168,16 @@ async function send(button)
     await fetch(DATABASE + "/meta/currentIndex.json",
     {
         method: "PUT",
-        headers:
-        {
-            "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(index + 1)
     });
 
     console.log("sent", button);
-// 視覺回饋
-    let btn =
-        event.target;
-
+    
+    // 視覺回饋：用 currentTarget 確保抓到正確的按鈕
+    let btn = event.currentTarget; 
     setActive(btn);
-}    
+}
 
 </script>
 
